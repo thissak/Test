@@ -9,12 +9,14 @@ set(WINDOW_HEIGHT 960)
 find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
 
-add_executable(HelloWorld helloworld.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     fmt::fmt
     glfw
+    glad::glad
  )
 
  target_compile_definitions(${PROJECT_NAME} PUBLIC
