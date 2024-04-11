@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(HelloWorld)
 
+# Set C++17 as the standard.
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(WINDOW_NAME "Hello Opengl")
 set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 960)
@@ -24,3 +28,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     WINDOW_WIDTH=${WINDOW_WIDTH}
     WINDOW_HEIGHT=${WINDOW_HEIGHT}
  )
+
+ 
