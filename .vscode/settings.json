@@ -1,0 +1,23 @@
+{
+  "cmake.configureOnOpen": false,
+  "cmake.configureSettings": {
+      "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "VCPKG_TARGET_TRIPLET" : "x64-windows",
+      "CMAKE_BUILD_TYPE": "${buildType}"
+  },
+  "cmake.environment": {
+  },
+  "cmake.buildEnvironment": {
+  },
+  "cmake.debugConfig": {
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+  },
+  "git.ignoreLimitWarning": true,
+  "files.associations": {
+      "memory": "cpp",
+      "type_traits": "cpp"
+  },
+  "dotnet.defaultSolution": "build/Test.sln"
+
+}
