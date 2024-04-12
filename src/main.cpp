@@ -1,4 +1,7 @@
-#include "common.h"
+#include "context.h"
+#include <spdlog/spdlog.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
@@ -18,11 +21,6 @@ void OnKeyEvent(GLFWwindow* window,
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-}
-
-void Render(){
-    glClearColor(0.1f, 0.2f, 0.3f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 int main(int arc, const char** argv)
@@ -64,6 +62,13 @@ int main(int arc, const char** argv)
     std::string versionString(reinterpret_cast<const char*>(glVersion));
     SPDLOG_INFO("OpenGL context version: {}", versionString);
 
+    auto context = Context::Create();
+    if(!context){
+        spdlog::error("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
+
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
@@ -71,10 +76,11 @@ int main(int arc, const char** argv)
     // glfw 루프실행, 윈도우 close 버튼을 누르면 정상 종료
     spdlog::info("Start main loop");
     while (!glfwWindowShouldClose(window)){
-        Render();
-        glfwSwapBuffers(window);
         glfwPollEvents();
+        context->Render();
+        glfwSwapBuffers(window);
     }
+    context.reset();
 
     glfwTerminate();
     return 0;

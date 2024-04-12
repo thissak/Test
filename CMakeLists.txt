@@ -15,7 +15,13 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} 
+   src/main.cpp
+   src/common.cpp src/common.h
+   src/shader.cpp src/shader.h
+   src/program.cpp src/program.h
+   src/context.cpp src/context.h
+   )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     fmt::fmt
