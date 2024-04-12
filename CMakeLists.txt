@@ -22,6 +22,7 @@ add_executable(${PROJECT_NAME}
    src/program.cpp src/program.h
    src/context.cpp src/context.h
    src/buffer.cpp src/buffer.h
+   src/vertexLayout.cpp src/vertexLayout.h
    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 

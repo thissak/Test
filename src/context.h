@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "program.h"
 #include "buffer.h"
+#include "vertexLayout.h"
 
 CLASS_PTR(Context)
 class Context{
@@ -19,6 +20,7 @@ private:
     uint32_t m_vertexArrayObject;
     BufferUPtr m_vertexBuffer;
     BufferUPtr m_indexBuffer;
+    VertexLayoutUPtr m_vertexLayout;
 };
 
 #endif __CONTEXT_H__
