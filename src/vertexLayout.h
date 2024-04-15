@@ -12,7 +12,7 @@ public:
     uint32_t Get() { return m_vertexArrayObject; }
     void Bind() const;
     void SetAttrib(uint32_t attribIndex, int count, uint32_t type, 
-        bool normalized, size_t stride, uint64_t offset) const;
+        bool normalized, GLsizei stride, uint64_t offset) const;
     void DisableAttrib(int attribIndex) const;
 private:
     VertexLayout() {}

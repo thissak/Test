@@ -12,10 +12,10 @@ ContextUPtr Context::Create(){
 
 bool Context::Init(){
     float vertices[] = {
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // 오른쪽 위
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // 오른쪽 아래
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // 왼쪽 아래
-        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // 왼쪽 위
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // 
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // 
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // 
+        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // 
     };
     uint32_t indices[]={
         0, 1, 3,
@@ -51,7 +51,7 @@ bool Context::Init(){
     SPDLOG_INFO("image: {}x{}, {} channels", image->GetWidth(), 
         image->GetHeight(), image->GetChannelCount());
 
-    // generate texture gpu에 할당
+    // generate texture gpu
     m_texture = Texture::CreateFromImage(image.get());
 
     auto image2 = Image::Load("./img/awesomeface.png");
@@ -66,13 +66,19 @@ bool Context::Init(){
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
 
+    auto transform = glm::rotate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f)), 
+        glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    // auto transform = glm::scale(glm::mat4(1.0f), glm::vec3(2.5f));
+    auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
     return true;
 }
 
 void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    m_program->Use();
+    // m_program->Use();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 }

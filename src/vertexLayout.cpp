@@ -17,7 +17,7 @@ void VertexLayout::Bind() const{
 }
 
 void VertexLayout::SetAttrib(uint32_t attribIndex, int count, uint32_t type, 
-        bool normalized, size_t stride, uint64_t offset) const{
+        bool normalized, GLsizei stride, uint64_t offset) const{
             glEnableVertexAttribArray(attribIndex);
             glVertexAttribPointer(attribIndex, count, type, normalized, stride, (const void*)offset);
 

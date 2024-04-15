@@ -4,6 +4,8 @@
     "glfw3",
     "spdlog",
     "glad",
-    "stb"
+    "stb",
+    "eigen3",
+    "glm"
   ]
 }

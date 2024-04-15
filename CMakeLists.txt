@@ -15,6 +15,8 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(Stb REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} 
    src/main.cpp
@@ -32,6 +34,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     fmt::fmt
     glfw
     glad::glad
+    Eigen3::Eigen
+    glm::glm
  )
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 
