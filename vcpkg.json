@@ -3,6 +3,7 @@
     "fmt",
     "glfw3",
     "spdlog",
-    "glad"
+    "glad",
+    "stb"
   ]
 }
