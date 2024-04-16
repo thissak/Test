@@ -36,7 +36,7 @@ void Program::Use() const{
 void Program::SetUniform(const std::string &name, int value) const
 {
     auto loc = glGetUniformLocation(m_program, name.c_str());
-    glUniform1i(m_program, value);
+    glUniform1i(loc, value);
 }
 
 void Program::SetUniform(const std::string &name, const glm::mat4 &value) const

@@ -89,9 +89,10 @@ bool Context::Init(){
     glBindTexture(GL_TEXTURE_2D, m_texture1->Get());
 
     m_program->Use();
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
-    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
-
+    // glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
+    // glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+    m_program->SetUniform("tex", 0);
+    m_program->SetUniform("tex2", 1);
 
     return true;
 }
