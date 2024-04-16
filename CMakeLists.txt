@@ -17,6 +17,7 @@ find_package(glad CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} 
    src/main.cpp
@@ -36,6 +37,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glad::glad
     Eigen3::Eigen
     glm::glm
+    imgui::imgui
+
+
  )
 target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
 

@@ -1,5 +1,13 @@
 {
   "dependencies": [
+    {
+      "name": "imgui",
+      "version>=": "1.90.2",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
+    },
     "fmt",
     "glfw3",
     "spdlog",
@@ -7,5 +15,6 @@
     "stb",
     "eigen3",
     "glm"
+
   ]
 }

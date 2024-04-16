@@ -26,8 +26,8 @@ private:
     VertexLayoutUPtr m_vertexLayout;
     BufferUPtr m_vertexBuffer;
     BufferUPtr m_indexBuffer;
-    TextureUPtr m_texture;
-    TextureUPtr m_texture2;
+    TextureUPtr m_texture0;
+    TextureUPtr m_texture1;
 
     //camera parameter
     bool m_cameraControl { false };
@@ -37,6 +37,9 @@ private:
     glm::vec3 m_cameraPos{ glm::vec3(0.0f, 0.0f, 3.0f)};
     glm::vec3 m_cameraFront{ glm::vec3(0.0f, 0.0f, -1.0f)};
     glm::vec3 m_cameraUp{ glm::vec3(0.0f, 1.0f, 0.0f)};
+
+    //clear color
+    glm::vec4 m_clearColor { glm::vec4(1.0f, 0.2f, 0.3f, 0.0f) };
 
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };

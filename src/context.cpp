@@ -1,7 +1,7 @@
 #include "context.h"
 #include "image.h"
-#include <vector>
-#include <cmath>
+#include <imgui.h>
+#include <random>
 
 
 ContextUPtr Context::Create(){
@@ -78,31 +78,44 @@ bool Context::Init(){
 
     // load image
     auto image = Image::Load("./img/container.jpg");
-    if(!image)
-        return false;
-    SPDLOG_INFO("image: {}x{}, {} channels", image->GetWidth(), 
-        image->GetHeight(), image->GetChannelCount());
-
-    // generate texture gpu
-    m_texture = Texture::CreateFromImage(image.get());
+    m_texture0 = Texture::CreateFromImage(image.get());
 
     auto image2 = Image::Load("./img/awesomeface.png");
-    m_texture2 = Texture::CreateFromImage(image2.get());
+    m_texture1 = Texture::CreateFromImage(image2.get());
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+    glBindTexture(GL_TEXTURE_2D, m_texture0->Get());
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+    glBindTexture(GL_TEXTURE_2D, m_texture1->Get());
 
     m_program->Use();
-    m_program->SetUniform("tex", 0);
-    m_program->SetUniform("tex2", 1);
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+
 
     return true;
 }
 
 
 void Context::Render() {
+    std::default_random_engine generator;  // 랜덤 넘버 생성기
+    std::uniform_real_distribution<float> distribution(0.0f, 3.0f);  // 초당 20도에서 100도 사이의 랜덤 회전 속도
+    if (ImGui::Begin("ui window")){
+        if(ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor))){
+           glClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w); 
+        }
+        ImGui::Separator();
+        ImGui::DragFloat3("camera pos", glm::value_ptr(m_cameraPos), 0.01f);
+        ImGui::DragFloat("camera yaw", &m_cameraYaw, 0.01f);
+        ImGui::DragFloat("camera pitch", &m_cameraPitch, 0.01f, -89.0f, 89.0f);
+        ImGui::Separator();
+        if (ImGui::Button("reset camera")){
+            m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+            m_cameraPitch = 0.0f;
+            m_cameraYaw = 0.0f;
+        }
+    }
+    ImGui::End();
     std::vector<glm::vec3> cubePos = {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(2.0f, 5.0f, -15.0f),
@@ -130,9 +143,10 @@ void Context::Render() {
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
     for (size_t i = 0; i < cubePos.size(); i++){
+        float randomSpeed = distribution(generator);
         auto& pos = cubePos[i];
         auto model = glm::translate(glm::mat4(1.0f), pos);
-        model = glm::rotate(model, glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i), 
+        model = glm::rotate(model, glm::radians((float)glfwGetTime() * 30.0f * randomSpeed + 20.0f * (float)i), 
             glm::vec3(1.0f, 0.5f, 0.5f));
     
         auto transform = projection * view * model;
@@ -193,7 +207,7 @@ void Context::MouseMove(double x, double y){
 }
 
 void Context::MouseButton(int button, int action, double x, double y){
-    if (button == GLFW_MOUSE_BUTTON_LEFT){
+    if (button == GLFW_MOUSE_BUTTON_RIGHT){
         if (action == GLFW_PRESS){
             m_prevMousePos = glm::vec2((float)x, (float)y);
             m_cameraControl = true;

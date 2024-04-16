@@ -2,8 +2,11 @@
 #include <spdlog/spdlog.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 void OnMouseLeftClick(GLFWwindow* window, int button, int action, int modifier){
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
     auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
     double x, y;
     glfwGetCursorPos(window, &x, &y);
@@ -76,6 +79,13 @@ int main(int arc, const char** argv)
     std::string versionString(reinterpret_cast<const char*>(glVersion));
     SPDLOG_INFO("OpenGL context version: {}", versionString);
 
+    auto imguiContext = ImGui::CreateContext();
+    ImGui::SetCurrentContext(imguiContext);
+    ImGui_ImplGlfw_InitForOpenGL(window, false);
+    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    ImGui_ImplOpenGL3_CreateDeviceObjects();
+
     auto context = Context::Create();
     if(!context){
         spdlog::error("failed to create context");
@@ -95,11 +105,23 @@ int main(int arc, const char** argv)
     spdlog::info("Start main loop");
     while (!glfwWindowShouldClose(window)){
         glfwPollEvents();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         context->ProcessInput(window);
         context->Render();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
     context.reset();
+
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(imguiContext);
 
     glfwTerminate();
     return 0;
