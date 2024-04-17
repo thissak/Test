@@ -34,7 +34,7 @@ private:
     glm::vec2 m_prevMousePos { glm::vec2(0.0f) };
     float m_cameraPitch { 0.0f };
     float m_cameraYaw { 0.0f };
-    glm::vec3 m_cameraPos{ glm::vec3(0.0f, 0.0f, 3.0f)};
+    glm::vec3 m_cameraPos{ glm::vec3(0.0f, 0.0f, 9.0f)};
     glm::vec3 m_cameraFront{ glm::vec3(0.0f, 0.0f, -1.0f)};
     glm::vec3 m_cameraUp{ glm::vec3(0.0f, 1.0f, 0.0f)};
 
@@ -49,6 +49,8 @@ private:
     glm::vec3 m_lightColor { glm::vec3(1.0f, 1.0f, 1.0f) };
     glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
     float m_ambientStrength { 0.1f };
+    float m_specularStrength { 0.5f };
+    float m_specularShininess { 32.0f };
 
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };

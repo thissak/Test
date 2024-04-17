@@ -107,6 +107,9 @@ void Context::Render() {
         ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
         ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
         ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
+        ImGui::SliderFloat("specular strength", &m_specularStrength, 0.0f, 1.0f);
+        ImGui::DragFloat("specular shininess", &m_specularShininess, 1.0f, 1.0f, 256.0f);
+
     }
 
         ImGui::Checkbox("animation", &m_animation); 
@@ -153,7 +156,7 @@ void Context::Render() {
         (float)m_width / (float)m_height, 0.01f, 20.0f);
     auto view = glm::lookAt(m_cameraPos, m_cameraPos + m_cameraFront, m_cameraUp);
 
-    // after computing projection and view matrix
+    // Light mesh render setting
     auto lightModelTransform = glm::translate(glm::mat4(1.0), m_lightPos) *
         glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
     m_program->Use();
@@ -165,10 +168,14 @@ void Context::Render() {
     m_program->SetUniform("modelTransform", lightModelTransform);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+	m_program->SetUniform("viewPos", m_cameraPos);
     m_program->SetUniform("lightPos", m_lightPos);
     m_program->SetUniform("lightColor", m_lightColor);
     m_program->SetUniform("objectColor", m_objectColor);
     m_program->SetUniform("ambientStrength", m_ambientStrength);
+    m_program->SetUniform("specularStrength", m_specularStrength);
+    m_program->SetUniform("specularShininess", m_specularShininess);
+
 
     for (size_t i = 0; i < cubePos.size(); i++){
         float randomSpeed = distribution(generator);
