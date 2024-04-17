@@ -18,7 +18,11 @@
     "memory": "cpp",
     "type_traits": "cpp",
     "xstring": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "algorithm": "cpp",
+    "locale": "cpp",
+    "optional": "cpp",
+    "ranges": "cpp"
   },
   "dotnet.defaultSolution": "build/Test.sln"
 
