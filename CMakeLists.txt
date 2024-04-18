@@ -18,6 +18,7 @@ find_package(Stb REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} 
    src/main.cpp
@@ -29,6 +30,7 @@ add_executable(${PROJECT_NAME}
    src/vertexLayout.cpp src/vertexLayout.h
    src/image.h src/image.cpp
    src/texture.h src/texture.cpp
+   src/mesh.h src/mesh.cpp
    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -38,6 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Eigen3::Eigen
     glm::glm
     imgui::imgui
+    assimp
 
 
  )

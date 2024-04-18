@@ -7,6 +7,7 @@
 #include "buffer.h"
 #include "vertexLayout.h"
 #include "texture.h"
+#include "mesh.h"
 
 CLASS_PTR(Context)
 class Context{
@@ -23,10 +24,7 @@ private:
     ProgramUPtr m_program;
     ProgramUPtr m_simpleProgram;
 
-    uint32_t m_vertexArrayObject;
-    VertexLayoutUPtr m_vertexLayout;
-    BufferUPtr m_vertexBuffer;
-    BufferUPtr m_indexBuffer;
+    MeshUPtr m_box; 
     TextureUPtr m_texture0;
     TextureUPtr m_texture1;
 
@@ -49,10 +47,10 @@ private:
     struct Light {
         glm::vec3 position { glm::vec3(3.0f, -0.7f, 0.7f) };
         glm::vec3 direction { glm::vec3(-1.0f, -1.0f, -1.0f) };
-        glm::vec2 cutoff { glm::vec2(20.0f, 5.0f) };
+        glm::vec2 cutoff { glm::vec2(80.0f, 5.0f) };
         float distance { 32.0f };
         glm::vec3 ambient { glm::vec3(0.5f, 0.5f, 0.5f) };
-        glm::vec3 diffuse { glm::vec3(0.5f, 0.5f, 0.5f) };
+        glm::vec3 diffuse { glm::vec3(1.0f, 1.0f, 1.0f) };
         glm::vec3 specular { glm::vec3(1.0f, 1.0f, 1.0f) };
     };
     Light m_light;

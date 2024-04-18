@@ -14,7 +14,8 @@
     "glad",
     "stb",
     "eigen3",
-    "glm"
+    "glm",
+    "assimp"
 
   ]
 }
