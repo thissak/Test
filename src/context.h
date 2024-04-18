@@ -21,6 +21,7 @@ private:
     Context(){}
     bool Init();
     ProgramUPtr m_program;
+    ProgramUPtr m_simpleProgram;
 
     uint32_t m_vertexArrayObject;
     VertexLayoutUPtr m_vertexLayout;
@@ -44,13 +45,25 @@ private:
     //clear color
     glm::vec4 m_clearColor { glm::vec4(1.0f, 0.2f, 0.3f, 0.0f) };
 
-      // light parameter
-    glm::vec3 m_lightPos { glm::vec3(1.0f, 0.0f, 3.0f) };
-    glm::vec3 m_lightColor { glm::vec3(1.0f, 1.0f, 1.0f) };
-    glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
-    float m_ambientStrength { 0.1f };
-    float m_specularStrength { 0.5f };
-    float m_specularShininess { 32.0f };
+    // light parameter
+    struct Light {
+        glm::vec3 position { glm::vec3(3.0f, -0.7f, 0.7f) };
+        glm::vec3 direction { glm::vec3(-1.0f, -1.0f, -1.0f) };
+        glm::vec2 cutoff { glm::vec2(20.0f, 5.0f) };
+        float distance { 32.0f };
+        glm::vec3 ambient { glm::vec3(0.5f, 0.5f, 0.5f) };
+        glm::vec3 diffuse { glm::vec3(0.5f, 0.5f, 0.5f) };
+        glm::vec3 specular { glm::vec3(1.0f, 1.0f, 1.0f) };
+    };
+    Light m_light;
+
+    // material parameter
+    struct Material {
+        TextureUPtr diffuse;
+        TextureUPtr specular;
+        float shininess { 32.0f };
+    };
+    Material m_material;
 
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };
