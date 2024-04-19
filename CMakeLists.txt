@@ -31,6 +31,7 @@ add_executable(${PROJECT_NAME}
    src/image.h src/image.cpp
    src/texture.h src/texture.cpp
    src/mesh.h src/mesh.cpp
+   src/model.h src/model.cpp
    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -40,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Eigen3::Eigen
     glm::glm
     imgui::imgui
-    assimp
+    assimp::assimp
 
 
  )

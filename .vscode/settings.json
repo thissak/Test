@@ -24,6 +24,17 @@
     "optional": "cpp",
     "ranges": "cpp"
   },
-  "dotnet.defaultSolution": "build/Test.sln"
-
+  "dotnet.defaultSolution": "build/Test.sln",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+        {
+            "scope": [
+                "variable.parameter"
+            ],
+            "settings": {
+                "fontStyle": "italic"
+            }
+        }
+    ]
+  }
 }

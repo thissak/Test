@@ -8,6 +8,7 @@
 #include "vertexLayout.h"
 #include "texture.h"
 #include "mesh.h"
+#include "model.h"
 
 CLASS_PTR(Context)
 class Context{
@@ -24,7 +25,8 @@ private:
     ProgramUPtr m_program;
     ProgramUPtr m_simpleProgram;
 
-    MeshUPtr m_box; 
+    MeshUPtr m_box;
+    ModelUPtr m_model; 
     TextureUPtr m_texture0;
     TextureUPtr m_texture1;
 
