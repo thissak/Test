@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
    src/texture.h src/texture.cpp
    src/mesh.h src/mesh.cpp
    src/model.h src/model.cpp
+   src/framebuffer.h src/framebuffer.cpp
    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
