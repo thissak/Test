@@ -12,6 +12,7 @@ struct Light {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+    float lightIntencity;
 };
  
 struct Material {
@@ -20,6 +21,7 @@ struct Material {
     float shininess;
 };
 
+//uniform float lightIntencity;
 uniform Light light;
 uniform int blinn;
 uniform Material material; 
@@ -43,6 +45,7 @@ void main() {
         vec3 pixelNorm = normalize(normal);
         float diff = max(dot(pixelNorm, lightDir), 0.0);
         vec3 diffuse = diff * texColor * light.diffuse;
+        
         vec3 specColor = texture2D(material.specular, texCoord).xyz;
         float spec = 0.0;
         if (blinn == 0) {
@@ -55,8 +58,9 @@ void main() {
             vec3 halfDir = normalize(lightDir + viewDir);
             spec = pow(max(dot(halfDir, pixelNorm), 0.0), material.shininess);
         }
+
         vec3 specular = spec * specColor * light.specular;
-        result += (diffuse + specular) * intensity;
+        result += (diffuse + specular) * light.lightIntencity;
     }
 
     result *= ambient;
