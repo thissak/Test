@@ -13,6 +13,7 @@ ContextUPtr Context::Create(){
     
 
 bool Context::Init(){
+    glEnable(GL_MULTISAMPLE);
     m_box = Mesh::CreateBox();
     m_plane = Mesh::CreatePlane();
 
@@ -20,6 +21,13 @@ bool Context::Init(){
     m_skyboxProgram = Program::Create("./shader/skybox.vs", "./shader/skybox.fs");
     if(!m_skyboxProgram){
         spdlog::error("fail to load skyboxProgram");
+        return false;
+    }
+    //envMap program
+    m_envMapProgram = Program::Create("./shader/env_map.vs", "./shader/env_map.fs");
+    int a = 1;
+    if (!m_envMapProgram){
+        spdlog::error("fail to load envMapProgram");
         return false;
     }
     //post program
@@ -61,6 +69,30 @@ bool Context::Init(){
         cubeFront.get(),
         cubeBack.get(),
     });
+
+    //grass
+    m_grassTexture = Texture::CreateFromImage(Image::Load("./img/grass.png").get());
+    m_grassProgram = Program::Create("./shader/grass.vs", "./shader/grass.fs");
+    m_grassPos.resize(50000);
+
+    for (size_t i= 0; i < m_grassPos.size(); i++){
+        m_grassPos[i].x = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f; //-5~5
+        m_grassPos[i].z = ((float)rand() / (float)RAND_MAX * 2.0f - 1.0f) * 5.0f;
+        m_grassPos[i].y = glm::radians((float)rand()) / (float)RAND_MAX * 360.0f;
+    }
+    m_grassInstance = VertexLayout::Create();
+    m_grassInstance->Bind();
+    m_plane->GetVertexBuffer()->Bind();
+    m_grassInstance->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    m_grassInstance->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, normal));
+    m_grassInstance->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetof(Vertex, texcoord)); 
+
+    m_grassPosBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW, m_grassPos.data(), 
+        sizeof(glm::vec3), m_grassPos.size()); 
+    m_grassPosBuffer->Bind();
+    m_grassInstance->SetAttrib(3, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
+    glVertexAttribDivisor(3, 1);
+    m_plane->GetIndexBuffer()->Bind();
     
     TexturePtr darkGrayTexture = Texture::CreateFromImage(
         Image::CreateSingleColorImage(4, 4,
@@ -110,6 +142,7 @@ void Context::Render() {
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
             ImGui::Checkbox("flash light", &m_flashLightMode);
+            ImGui::Checkbox("l.blinn", &m_blinn);
         }
             
 
@@ -133,7 +166,7 @@ void Context::Render() {
     ImGui::End();
     // ... imgui codes end
 
-    m_framebuffer->Bind();
+    // m_framebuffer->Bind();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -186,6 +219,9 @@ void Context::Render() {
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
 
+    //blinn
+    m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
+
     //plane
     auto modelTransform = 
         glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) * 
@@ -195,6 +231,21 @@ void Context::Render() {
     m_program->SetUniform("modelTransform", modelTransform);
     m_planeMat->SetToProgram(m_program.get());
     m_box->Draw(m_program.get());
+
+    //envMap cube
+    modelTransform = 
+        glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.75f, -2.0f)) * 
+        glm::rotate(glm::mat4(1.0f), glm::radians(40.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * 
+        glm::scale(glm::mat4(1.0f), glm::vec3(1.5f, 1.5f, 1.5f));
+    transform = projection * view * modelTransform;
+    m_envMapProgram->Use();
+    m_envMapProgram->SetUniform("model", modelTransform);
+    m_envMapProgram->SetUniform("view", view);
+    m_envMapProgram->SetUniform("projection", projection);
+    m_envMapProgram->SetUniform("cameraPos", m_cameraPos);
+    m_cubeTexture->Bind();
+    m_envMapProgram->SetUniform("skybox", 0);
+    m_box->Draw(m_envMapProgram.get());
 
     //box1
     modelTransform = 
@@ -243,17 +294,30 @@ void Context::Render() {
     m_textureProgram->SetUniform("transform", transform);
     m_plane->Draw(m_textureProgram.get());
 
-    Framebuffer::BindToDefault();
+    //grass
+    glEnable(GL_BLEND);
+    m_grassProgram->Use();
+    m_grassProgram->SetUniform("tex", 0);
+    m_grassTexture->Bind();
+    m_grassInstance->Bind();
+    modelTransform = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 0.0f));
+    transform = projection * view * modelTransform;
+    m_grassProgram->SetUniform("transform", transform);
+    glDrawElementsInstanced(GL_TRIANGLES,
+        m_plane->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0,
+    m_grassPosBuffer->GetCount());
+    
+    // Framebuffer::BindToDefault();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    m_postProgram->Use();
-    m_postProgram->SetUniform("transform", 
-        glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
-    m_postProgram->SetUniform("gamma", m_gamma);
-    m_framebuffer->GetColorAttachment()->Bind();
-    m_postProgram->SetUniform("tex", 0);
-    m_plane->Draw(m_postProgram.get());
+    // m_postProgram->Use();
+    // m_postProgram->SetUniform("transform", 
+    //     glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 1.0f)));
+    // m_postProgram->SetUniform("gamma", m_gamma);
+    // m_framebuffer->GetColorAttachment()->Bind();
+    // m_postProgram->SetUniform("tex", 0);
+    // m_plane->Draw(m_postProgram.get());
 }
 
 void Context::ProcessInput(GLFWwindow *window){

@@ -64,6 +64,7 @@ private:
     };
     Light m_light;
     bool m_flashLightMode { false };
+    bool m_blinn { false };
 
     //framebuffer
     FramebufferUPtr m_framebuffer;
@@ -71,6 +72,14 @@ private:
     //cubemap
     CubeTextureUPtr m_cubeTexture;
     ProgramUPtr m_skyboxProgram;
+    ProgramUPtr m_envMapProgram;
+
+    //grass
+    TexturePtr m_grassTexture;
+    ProgramUPtr m_grassProgram;
+    std::vector<glm::vec3> m_grassPos;
+    BufferUPtr m_grassPosBuffer;
+    VertexLayoutUPtr m_grassInstance;
 
 
     int m_width { WINDOW_WIDTH };
