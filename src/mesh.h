@@ -11,6 +11,7 @@ struct Vertex{
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texcoord;
+    glm::vec3 tangent;
 };
 
 CLASS_PTR(Material);
@@ -42,12 +43,14 @@ public:
     void SetMaterial(MaterialPtr material){ m_material = material; }
     MaterialPtr GetMaterial() const { return m_material; }
 
-    const VertexLayout *GetVertexLayout() const {
-        return m_vertexLayout.get();
-    }
+    const VertexLayout *GetVertexLayout() const { return m_vertexLayout.get(); }
     BufferPtr GetVertexBuffer() const { return m_vertexBuffer; }
     BufferPtr GetIndexBuffer() const { return m_indexBuffer; }
+    
     void Draw(const Program *program) const;
+
+    static void ComputeTangents(std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+
 private:
     Mesh() {}
     void Init(const std::vector<Vertex> &vertices,

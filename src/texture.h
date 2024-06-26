@@ -7,23 +7,28 @@
 CLASS_PTR(Texture)
 class Texture{
 public:
-    static TextureUPtr Create(int width, int height, uint32_t format);
-    static TextureUPtr CreateFromImage(const Image* image);
+    static TextureUPtr Create(int width, int height, 
+        uint32_t format, uint32_t type = GL_UNSIGNED_BYTE);
     ~Texture();
+    uint32_t GetType() const { return m_type; }
+    uint32_t m_type { GL_UNSIGNED_BYTE };
+    void SetTextureFormat(int width, int height, uint32_t format, uint32_t type);
+    static TextureUPtr CreateFromImage(const Image* image);
 
     const uint32_t Get() const { return m_texture; }
     void Bind() const;
     void SetFilter(uint32_t minFilter, uint32_t magFilter) const;
     void SetWrap(uint32_t sWrap, uint32_t tWrap) const;
+    void SetBorderColor(const glm::vec4& color) const;
 
     int GetWidth() const { return m_width; }
     int GetHeight() const { return m_height; }
     uint32_t GetFormat() const { return m_format; }
+
 private:
     Texture() {}
     void CreateTexture();
-    void setTextureFromImage(const Image* image);
-    void setTextureFormat(int width, int height, uint32_t format);
+    void SetTextureFromImage(const Image* image);
 
     uint32_t m_texture { 0 };
     int m_width { 0 };

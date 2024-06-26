@@ -33,6 +33,8 @@ add_executable(${PROJECT_NAME}
    src/mesh.h src/mesh.cpp
    src/model.h src/model.cpp
    src/framebuffer.h src/framebuffer.cpp
+   src/shadow_map.cpp
+   src/shader.h
    )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
