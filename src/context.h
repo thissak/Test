@@ -76,6 +76,10 @@ private:
     //framebuffer
     FramebufferUPtr m_framebuffer;
 
+    // deferred shading
+    FramebufferUPtr m_deferGeoFramebuffer;
+    ProgramUPtr m_deferGeoProgram;
+
     //normal map
     TexturePtr m_brickDiffuseTexture;
     TexturePtr m_brickNormalTexture;
