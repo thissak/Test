@@ -74,6 +74,19 @@ bool Context::Init(){
 
     //deffered program
     m_deferGeoProgram = Program::Create("./shader/defer_geo.vs","./shader/defer_geo.fs");
+    m_deferLightProgram = Program::Create("./shader/defer_light.vs", "./shader/defer_light.fs");
+    m_deferLights.resize(32);
+    for (size_t i = 0; i < m_deferLights.size(); i++)
+    {
+        m_deferLights[i].position = glm::vec3(
+            RandomRange(-10.0f, 10.0f),
+            RandomRange(1.0f, 4.0f),
+            RandomRange(-10.0f, 10.0f));
+        m_deferLights[i].color = glm::vec3(
+            RandomRange(0.05f, 0.3f),
+            RandomRange(0.05f, 0.3f),
+            RandomRange(0.05f, 0.3f));
+    }
 
     //skybox program
     m_skyboxProgram = Program::Create("./shader/skybox.vs", "./shader/skybox.fs");
@@ -288,77 +301,98 @@ void Context::Render() {
     m_deferGeoProgram->Use();
     DrawScene(view, projection, m_deferGeoProgram.get());
 
+    glEnable(GL_DEPTH_TEST);
     Framebuffer::BindToDefault();
     glViewport(0, 0, m_width, m_height);
     glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 
-    
-    //skybox
-    auto skyboxModelTransform = 
-        glm::translate(glm::mat4(1.0), m_cameraPos) *
-        glm::scale(glm::mat4(1.0), glm::vec3(50.0f));
-    m_skyboxProgram->Use();
-    m_cubeTexture->Bind();
-    m_skyboxProgram->SetUniform("skybox", 0);
-    m_skyboxProgram->SetUniform("transform", projection * view * skyboxModelTransform);
-    m_box->Draw(m_skyboxProgram.get());
-
-    // Light mesh render setting
-    auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
-                               glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-    m_simpleProgram->Use();
-    m_simpleProgram->SetUniform("color", glm::vec4((m_light.diffuse + m_light.ambient), 1.0f));
-    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    m_box->Draw(m_simpleProgram.get());
-
-    glm::vec3 lightPos = m_light.position;
-    glm::vec3 lightDir = m_light.direction;
-    if (m_flashLightMode){
-        lightPos = m_cameraPos;
-        lightDir = m_cameraFront;
+    m_deferLightProgram->Use();
+    glActiveTexture(GL_TEXTURE0);
+    m_deferGeoFramebuffer->GetColorAttachment(0)->Bind();
+    glActiveTexture(GL_TEXTURE1);
+    m_deferGeoFramebuffer->GetColorAttachment(1)->Bind();
+    glActiveTexture(GL_TEXTURE2);
+    m_deferGeoFramebuffer->GetColorAttachment(2)->Bind();
+    glActiveTexture(GL_TEXTURE0);
+    m_deferLightProgram->SetUniform("gPosition", 0);
+    m_deferLightProgram->SetUniform("gNormal", 1);
+    m_deferLightProgram->SetUniform("gAlbedoSpec", 2);
+    for (size_t i = 0; i < m_deferLights.size(); i++)
+    {
+        auto posName = fmt::format("lights[{}].position", i);
+        auto colorName = fmt::format("lights[{}].color", i);
+        m_deferLightProgram->SetUniform(posName, m_deferLights[i].position);
+        m_deferLightProgram->SetUniform(colorName, m_deferLights[i].color);
+        m_deferLightProgram->SetUniform("transform", glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+        m_plane->Draw(m_deferLightProgram.get());
     }
 
-    m_lightingShadowProgram->Use();
-    m_lightingShadowProgram->SetUniform("viewPos", m_cameraPos);
-    m_lightingShadowProgram->SetUniform("light.directional", m_light.directional ? 1 : 0);
-    m_lightingShadowProgram->SetUniform("light.position", m_light.position);
-    m_lightingShadowProgram->SetUniform("light.direction", m_light.direction);
-    m_lightingShadowProgram->SetUniform("light.cutoff", glm::vec2(
-        cosf(glm::radians(m_light.cutoff[0])),
-        cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
-    m_lightingShadowProgram->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
-    m_lightingShadowProgram->SetUniform("light.ambient", m_light.ambient);
-    m_lightingShadowProgram->SetUniform("light.diffuse", m_light.diffuse);
-    m_lightingShadowProgram->SetUniform("light.specular", m_light.specular);
-    m_lightingShadowProgram->SetUniform("blinn", (m_blinn ? 1 : 0));
-    m_lightingShadowProgram->SetUniform("lightTransform", lightProjection * lightView);
-    m_lightingShadowProgram->SetUniform("shadowColor", m_light.shadowColor);
-    glActiveTexture(GL_TEXTURE3);
-    m_shadowMap->GetShadowMap()->Bind();
-    m_lightingShadowProgram->SetUniform("shadowMap", 3);
-    glActiveTexture(GL_TEXTURE0);
+    
+    // //skybox
+    // auto skyboxModelTransform = 
+    //     glm::translate(glm::mat4(1.0), m_cameraPos) *
+    //     glm::scale(glm::mat4(1.0), glm::vec3(50.0f));
+    // m_skyboxProgram->Use();
+    // m_cubeTexture->Bind();
+    // m_skyboxProgram->SetUniform("skybox", 0);
+    // m_skyboxProgram->SetUniform("transform", projection * view * skyboxModelTransform);
+    // m_box->Draw(m_skyboxProgram.get());
 
-    DrawScene(view, projection, m_lightingShadowProgram.get());
+    // // Light mesh render setting
+    // auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
+    //                            glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    // m_simpleProgram->Use();
+    // m_simpleProgram->SetUniform("color", glm::vec4((m_light.diffuse + m_light.ambient), 1.0f));
+    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    // m_box->Draw(m_simpleProgram.get());
 
-    auto modelTransform = 
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f)) * 
-        glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    m_normalProgram->Use();
-    m_normalProgram->SetUniform("viewPos", m_cameraPos);
-    m_normalProgram->SetUniform("lightPos", m_light.position);
-    glActiveTexture(GL_TEXTURE0);
-    m_brickDiffuseTexture->Bind();
-    m_normalProgram->SetUniform("diffuse", 0);
-    glActiveTexture(GL_TEXTURE1);
-    m_brickNormalTexture->Bind();
-    m_normalProgram->SetUniform("normalMap", 1);
-    glActiveTexture(GL_TEXTURE0);
-    m_normalProgram->SetUniform("modelTransform", modelTransform);
-    m_normalProgram->SetUniform("transform", projection * view * modelTransform);
-    m_plane->Draw(m_normalProgram.get());
+    // glm::vec3 lightPos = m_light.position;
+    // glm::vec3 lightDir = m_light.direction;
+    // if (m_flashLightMode){
+    //     lightPos = m_cameraPos;
+    //     lightDir = m_cameraFront;
+    // }
+
+    // m_lightingShadowProgram->Use();
+    // m_lightingShadowProgram->SetUniform("viewPos", m_cameraPos);
+    // m_lightingShadowProgram->SetUniform("light.directional", m_light.directional ? 1 : 0);
+    // m_lightingShadowProgram->SetUniform("light.position", m_light.position);
+    // m_lightingShadowProgram->SetUniform("light.direction", m_light.direction);
+    // m_lightingShadowProgram->SetUniform("light.cutoff", glm::vec2(
+    //     cosf(glm::radians(m_light.cutoff[0])),
+    //     cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
+    // m_lightingShadowProgram->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
+    // m_lightingShadowProgram->SetUniform("light.ambient", m_light.ambient);
+    // m_lightingShadowProgram->SetUniform("light.diffuse", m_light.diffuse);
+    // m_lightingShadowProgram->SetUniform("light.specular", m_light.specular);
+    // m_lightingShadowProgram->SetUniform("blinn", (m_blinn ? 1 : 0));
+    // m_lightingShadowProgram->SetUniform("lightTransform", lightProjection * lightView);
+    // m_lightingShadowProgram->SetUniform("shadowColor", m_light.shadowColor);
+    // glActiveTexture(GL_TEXTURE3);
+    // m_shadowMap->GetShadowMap()->Bind();
+    // m_lightingShadowProgram->SetUniform("shadowMap", 3);
+    // glActiveTexture(GL_TEXTURE0);
+
+    // DrawScene(view, projection, m_lightingShadowProgram.get());
+
+    // auto modelTransform = 
+    //     glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f)) * 
+    //     glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    // m_normalProgram->Use();
+    // m_normalProgram->SetUniform("viewPos", m_cameraPos);
+    // m_normalProgram->SetUniform("lightPos", m_light.position);
+    // glActiveTexture(GL_TEXTURE0);
+    // m_brickDiffuseTexture->Bind();
+    // m_normalProgram->SetUniform("diffuse", 0);
+    // glActiveTexture(GL_TEXTURE1);
+    // m_brickNormalTexture->Bind();
+    // m_normalProgram->SetUniform("normalMap", 1);
+    // glActiveTexture(GL_TEXTURE0);
+    // m_normalProgram->SetUniform("modelTransform", modelTransform);
+    // m_normalProgram->SetUniform("transform", projection * view * modelTransform);
+    // m_plane->Draw(m_normalProgram.get());
 
     //plane
     // auto modelTransform = 

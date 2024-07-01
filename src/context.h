@@ -80,6 +80,14 @@ private:
     FramebufferUPtr m_deferGeoFramebuffer;
     ProgramUPtr m_deferGeoProgram;
 
+    ProgramUPtr m_deferLightProgram;
+    struct DeferLight
+    {
+        glm::vec3 position;
+        glm::vec3 color;
+    };
+    std::vector<DeferLight> m_deferLights;
+
     //normal map
     TexturePtr m_brickDiffuseTexture;
     TexturePtr m_brickNormalTexture;
