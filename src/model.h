@@ -15,7 +15,7 @@ public:
 
     int GetMeshCount() const { return (int)m_meshes.size(); }
     MeshPtr GetMesh(int index) const { return m_meshes[index]; }
-    void Draw(Program *program) const;
+    void Draw(const Program *program) const;
 
 private:
     Model() {}

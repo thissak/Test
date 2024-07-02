@@ -109,6 +109,11 @@ private:
     ShadowMapUPtr m_shadowMap;
     ProgramUPtr m_lightingShadowProgram;
 
+    //ssao
+    FramebufferUPtr m_ssaoFramebuffer;
+    ProgramUPtr m_ssaoProgram;
+    ModelUPtr m_model;
+
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };
 

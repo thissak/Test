@@ -84,7 +84,7 @@ void Model::ProcessMesh(aiMesh *mesh, const aiScene *scene){
     m_meshes.push_back(std::move(glMesh));
 }
 
-void Model::Draw(Program *program) const {
+void Model::Draw(const Program *program) const {
     for (auto &mesh : m_meshes) {
         mesh->Draw(program);
     }

@@ -25,6 +25,16 @@ void Context::DrawScene(const glm::mat4& view,
         m_planeMat->SetToProgram(program);
         m_box->Draw(program);
 
+        // ssao test
+        modelTransform = 
+        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.55f, 0.0f)) * 
+        glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * 
+        glm::scale(glm::mat4(1.0f),  glm::vec3(0.5f, 0.5f, 0.5f));
+        transform = projection * view * modelTransform;
+        program->SetUniform("transform", transform);
+        program->SetUniform("modelTransform", modelTransform);
+        m_model->Draw(program);
+
         modelTransform = 
             glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.75f, -4.0f)) * 
             glm::rotate(glm::mat4(1.0f), glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * 
@@ -72,6 +82,9 @@ bool Context::Init(){
     m_box = Mesh::CreateBox();
     m_plane = Mesh::CreatePlane();
 
+    //ssao
+    m_ssaoProgram = Program::Create("./shader/ssao.vs", "./shader/ssao.fs");
+    m_model = Model::Load("./model/backpack.obj");
     //deffered program
     m_deferGeoProgram = Program::Create("./shader/defer_geo.vs","./shader/defer_geo.fs");
     m_deferLightProgram = Program::Create("./shader/defer_light.vs", "./shader/defer_light.fs");
@@ -266,6 +279,13 @@ void Context::Render() {
     }
     ImGui::End();
 
+    if (ImGui::Begin("SSAO")){
+        float width = ImGui::GetContentRegionAvail().x;
+        float height = width * ((float)m_height / (float)m_width);
+        ImGui::Image((ImTextureID)m_ssaoFramebuffer->GetColorAttachment()->Get(), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
+    }
+    ImGui::End();
+
 
 
     auto lightView = glm::lookAt(m_light.position, m_light.position + m_light.direction,
@@ -300,6 +320,22 @@ void Context::Render() {
     glViewport(0,0, m_width, m_height);
     m_deferGeoProgram->Use();
     DrawScene(view, projection, m_deferGeoProgram.get());
+
+    m_ssaoFramebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, m_width, m_height);
+    m_ssaoProgram->Use();
+    glActiveTexture(GL_TEXTURE0);
+    m_deferGeoFramebuffer->GetColorAttachment(0)->Bind();
+    glActiveTexture(GL_TEXTURE1);
+    m_deferGeoFramebuffer->GetColorAttachment(1)->Bind();
+    glActiveTexture(GL_TEXTURE0);
+    m_ssaoProgram->SetUniform("gPosition", 0);
+    m_ssaoProgram->SetUniform("gNormal", 1);
+    m_ssaoProgram->SetUniform("transform",
+        glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+    m_ssaoProgram->SetUniform("view", view);
+    m_plane->Draw(m_ssaoProgram.get());
 
     glEnable(GL_DEPTH_TEST);
     Framebuffer::BindToDefault();
@@ -343,6 +379,7 @@ void Context::Render() {
             glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
         m_box->Draw(m_simpleProgram.get());
     }
+
 
     
     // //skybox
@@ -537,6 +574,7 @@ void Context::Reshape(int width, int height)
     m_height = height;
     glViewport(0, 0, m_width, m_height);
     m_framebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RGBA), });
+    m_ssaoFramebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RED), });
 
     m_deferGeoFramebuffer = Framebuffer::Create({
         Texture::Create(width, height, GL_RGBA16F, GL_FLOAT),
