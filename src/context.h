@@ -44,9 +44,9 @@ private:
     //camera parameter
     bool m_cameraControl { false };
     glm::vec2 m_prevMousePos { glm::vec2(0.0f) };
-    float m_cameraPitch { -20.0f };
+    float m_cameraPitch { 0.0f };
     float m_cameraYaw { 0.0f };
-    glm::vec3 m_cameraPos{ glm::vec3(-0.17f, 3.95f, 1.7f)};
+    glm::vec3 m_cameraPos{ glm::vec3(-1.17f, 6.95f, 3.7f)};
     glm::vec3 m_cameraFront{ glm::vec3(0.0f, -1.0f, 0.0f)};
     glm::vec3 m_cameraUp{ glm::vec3(0.0f, 1.0f, 0.0f)};
 
@@ -113,11 +113,12 @@ private:
     FramebufferUPtr m_ssaoFramebuffer;
     ProgramUPtr m_ssaoProgram;
     ModelUPtr m_model;
+    TextureUPtr m_ssaoNoiseTexture;
+    std::vector<glm::vec3> m_ssaoSamples;
+    float m_ssaoRadius{ 1.0f };
 
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };
-
-
 };
 
 #endif __CONTEXT_H__
