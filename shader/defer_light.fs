@@ -28,7 +28,7 @@ void main()
     {
         vec3 lightDir = normalize(lights[i].position - fragPos).rgb;
         vec3 diffuse = max(dot(normal, lightDir), 0.0) * albedo * lights[i].color;
-        lighting += diffuse;
+        lighting += diffuse*0.5;
     }
     fragColor = vec4(lighting, 1.0);
 }
