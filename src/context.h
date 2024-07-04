@@ -116,6 +116,7 @@ private:
     TextureUPtr m_ssaoNoiseTexture;
     std::vector<glm::vec3> m_ssaoSamples;
     float m_ssaoRadius{ 1.0f };
+    bool m_useSsao{ true };
 
     ProgramUPtr m_blurProgram;
     FramebufferUPtr m_blurSsaoFramebuffer;

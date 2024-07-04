@@ -5,6 +5,8 @@ in vec2 texCoord;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D ssaoTex;
+uniform int useSsao;
 
 struct Light {
     vec3 position;
@@ -22,7 +24,16 @@ void main()
     vec3 albedo = texture(gAlbedoSpec, texCoord).rgb;
     float specular = texture(gAlbedoSpec, texCoord).a;
 
-    vec3 lighting = albedo * 0.1;
+    // if (useSsao == 1)
+    //     fragColor = vec4(texture(ssaoTex, texCoord).rgb, 1.0);
+    // else
+    //     fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+    // return;
+
+    vec3 ambient = useSsao == 1 ?
+        texture(ssaoTex, texCoord).r * 0.4 * albedo :
+        albedo * 0.4;
+    vec3 lighting = ambient;
     vec3 viewDir = normalize(viewPos - fragPos);
     for (int i = 0; i < NR_LIGHTS; ++i)
     {

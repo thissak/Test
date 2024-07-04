@@ -115,9 +115,9 @@ bool Context::Init(){
             RandomRange(1.0f, 4.0f),
             RandomRange(-10.0f, 10.0f));
         m_deferLights[i].color = glm::vec3(
-            RandomRange(0.01f, 0.7f),
-            RandomRange(0.01f, 0.7f),
-            RandomRange(0.01f, 0.7f));
+            RandomRange(0.0f, i > 3 ? 0.0f : 1.0f),
+            RandomRange(0.0f, i > 3 ? 0.0f : 1.0f),
+            RandomRange(0.0f, i > 3 ? 0.0f : 1.0f));
     }
 
     //skybox program
@@ -276,6 +276,7 @@ void Context::Render() {
             ImGui::ColorEdit3("l.shadowColor", glm::value_ptr(m_light.shadowColor));
             ImGui::DragFloat("ssao radius", &m_ssaoRadius, 0.01f, 0.0f, 5.0f);
             ImGui::Checkbox("l.blinn", &m_blinn);
+            ImGui::Checkbox("use ssao", &m_useSsao);
         }
             
         ImGui::Checkbox("animation", &m_animation); 
@@ -376,10 +377,14 @@ void Context::Render() {
     m_deferGeoFramebuffer->GetColorAttachment(1)->Bind();
     glActiveTexture(GL_TEXTURE2);
     m_deferGeoFramebuffer->GetColorAttachment(2)->Bind();
+    glActiveTexture(GL_TEXTURE3);
+    m_blurSsaoFramebuffer->GetColorAttachment()->Bind();
     glActiveTexture(GL_TEXTURE0);
     m_deferLightProgram->SetUniform("gPosition", 0);
     m_deferLightProgram->SetUniform("gNormal", 1);
     m_deferLightProgram->SetUniform("gAlbedoSpec", 2);
+    m_deferLightProgram->SetUniform("ssaoTex", 3);
+    m_deferLightProgram->SetUniform("useSsao", m_useSsao ? 1 : 0);
     for (size_t i = 0; i < m_deferLights.size(); i++)
     {
         auto posName = fmt::format("lights[{}].position", i);
