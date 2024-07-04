@@ -105,6 +105,8 @@ bool Context::Init(){
     //deffered program
     m_deferGeoProgram = Program::Create("./shader/defer_geo.vs","./shader/defer_geo.fs");
     m_deferLightProgram = Program::Create("./shader/defer_light.vs", "./shader/defer_light.fs");
+    m_blurProgram = Program::Create("./shader/blur_5x5.vs", "./shader/blur_5x5.fs");
+
     m_deferLights.resize(32);
     for (size_t i = 0; i < m_deferLights.size(); i++)
     {
@@ -311,9 +313,17 @@ void Context::Render() {
     ImGui::End();
 
     if (ImGui::Begin("SSAO")){
+        const char* bufferNames[] = {"original", "blurred"};
+        static int bufferSelect = 0;
+        ImGui::Combo("ssao buffer", &bufferSelect, bufferNames, 2);
         float width = ImGui::GetContentRegionAvail().x;
         float height = width * ((float)m_height / (float)m_width);
-        ImGui::Image((ImTextureID)m_ssaoFramebuffer->GetColorAttachment()->Get(), ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
+        auto selectedAttachment = bufferSelect == 0 ? 
+        m_ssaoFramebuffer->GetColorAttachment() :
+        m_blurSsaoFramebuffer->GetColorAttachment();
+
+        ImGui::Image((ImTextureID)selectedAttachment->Get(), 
+            ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
     }
     ImGui::End();
 
@@ -396,7 +406,7 @@ void Context::Render() {
     m_ssaoProgram->SetUniform("gNormal", 1);
     m_ssaoProgram->SetUniform("texNoise", 2);
     m_ssaoProgram->SetUniform("noiseScale", glm::vec2(
-        (float)m_width / (float)m_ssaoNoiseTexture->GetWidth(),
+        (float)m_width / (float)m_ssaoNoiseTexture->GetWidth(), 
         (float)m_height / (float)m_ssaoNoiseTexture->GetHeight()));
     m_ssaoProgram->SetUniform("radius", m_ssaoRadius);
     for (size_t i = 0; i < m_ssaoSamples.size(); i++)
@@ -408,6 +418,16 @@ void Context::Render() {
         glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
     m_ssaoProgram->SetUniform("view", view);
     m_ssaoProgram->SetUniform("projection", projection);
+    m_plane->Draw(m_ssaoProgram.get());
+
+    m_blurSsaoFramebuffer->Bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, m_width, m_height);
+    m_blurProgram->Use();
+    m_ssaoFramebuffer->GetColorAttachment(0)->Bind();
+    m_blurProgram->SetUniform("tex", 0);
+    m_blurProgram->SetUniform("transform", 
+        glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
     m_plane->Draw(m_ssaoProgram.get());
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_deferGeoFramebuffer->Get());
@@ -620,6 +640,7 @@ void Context::Reshape(int width, int height)
     glViewport(0, 0, m_width, m_height);
     m_framebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RGBA), });
     m_ssaoFramebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RED), });
+    m_blurSsaoFramebuffer = Framebuffer::Create({Texture::Create(width, height, GL_RED), });
 
     m_deferGeoFramebuffer = Framebuffer::Create({
         Texture::Create(width, height, GL_RGBA16F, GL_FLOAT),

@@ -117,6 +117,9 @@ private:
     std::vector<glm::vec3> m_ssaoSamples;
     float m_ssaoRadius{ 1.0f };
 
+    ProgramUPtr m_blurProgram;
+    FramebufferUPtr m_blurSsaoFramebuffer;
+
     int m_width { WINDOW_WIDTH };
     int m_height { WINDOW_HEIGHT };
 };
