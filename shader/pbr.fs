@@ -32,7 +32,7 @@ float DistributionGGX(vec3 normal, vec3 halfDir, float roughness){
     float dotNH2 = dotNH * dotNH;
 
     float num = a2;
-    float denom = (dotNH2 * (a2 - 1.0) + 1.0);
+    float denom = (dotNH2 * (a2 - 1.0) + 1.0);  
     return a2 / (PI * denom * denom);
 }
 

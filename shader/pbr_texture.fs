@@ -15,6 +15,7 @@ struct Light {
 
 const int LIGHT_COUNT = 4;
 uniform Light lights[LIGHT_COUNT];
+uniform float myRoughness;
 
 struct Material {
     sampler2D albedo;
@@ -61,8 +62,10 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0){
 
 void main(){
     vec3 albedo = pow(texture(material.albedo, texCoord).rgb, vec3(2.2));
+    // vec3 albedo = vec3(clamp(myRoughness, 0.0, 1.0), 0.0, 0.0);
     float metallic = texture(material.metallic, texCoord).r;
-    float roughness = texture(material.roughness, texCoord).r;
+    // float roughness = min((texture(material.roughness, texCoord).r), 1.0);
+    float roughness = min((texture(material.roughness, texCoord).r) + myRoughness*0.4, 1.0);
     float ao = material.ao;
     vec3 fragNormal = texture(material.normal, texCoord).rgb * 2.0 - 1.0;
     fragNormal = TBN * fragNormal;

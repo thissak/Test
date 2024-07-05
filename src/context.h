@@ -28,6 +28,11 @@ private:
     Context(){}
     bool Init();
 
+    TextureUPtr m_hdrMap;
+    ProgramUPtr m_sphericalMapProgram;
+    CubeTexturePtr m_hdrCubeMap;
+    
+    ProgramUPtr m_skyboxProgram;
     ProgramUPtr m_simpleProgram;
     ProgramUPtr m_pbrProgram;
 
@@ -41,13 +46,20 @@ private:
     };
     std::vector<Light> m_lights;
 
-    struct Material {
-        TextureUPtr albedo;
-        TextureUPtr metallic;
-        TextureUPtr roughness;
-        TextureUPtr normal;
-        float ao { 0.1f }; 
+    struct Material{
+        glm::vec3 albedo { glm::vec3(1.0f, 1.0f, 1.0f) };
+        float metallic { 0.5f };
+        float roughness { 0.5f };
+        float ao { 0.1f };
     };
+
+    // struct Material {
+    //     TextureUPtr albedo;
+    //     TextureUPtr metallic;
+    //     TextureUPtr roughness;
+    //     TextureUPtr normal;
+    //     float ao { 0.1f }; 
+    // };
     Material m_material;
 
     int m_width { 640 };
