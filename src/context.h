@@ -35,6 +35,8 @@ private:
     ProgramUPtr m_skyboxProgram;
     ProgramUPtr m_simpleProgram;
     ProgramUPtr m_pbrProgram;
+    CubeTexturePtr m_diffuseIrradianceMap;
+    ProgramUPtr m_diffuseIrradianceProgram;
 
     MeshUPtr m_box;
     MeshUPtr m_plane;
